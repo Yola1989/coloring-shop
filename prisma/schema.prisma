@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model Book {
+  id          Int      @id @default(autoincrement())
+  title       String
+  price       Int
+  cover       String
+  description String
+  pages       Int
+  age         String
+  preview     String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orderItems  OrderItem[]
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  orderNumber String      @unique
+  fullName    String
+  phone       String
+  city        String
+  address     String
+  notes       String?
+  totalAmount Int
+  status      OrderStatus @default(NEW)
+  items       OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    Int
+  book       Book?    @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  bookId     Int?
+  // Snapshot of book data at order time, so edits/deletes to the book
+  // later don't change historical orders.
+  title      String
+  price      Int
+  quantity   Int
+}
