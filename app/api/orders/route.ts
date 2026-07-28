@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/orderNumber";
 import { sendNewOrderEmail } from "@/lib/email";
+import { getPromotionPriceMap, getEffectivePrice } from "@/lib/pricing";
 
 type CartInput = {
   id: number;
+  type?: "book" | "offer";
   quantity: number;
 };
 
@@ -31,28 +33,58 @@ export async function POST(req: NextRequest) {
   }
 
   // Always re-fetch prices/titles from the DB — never trust the client,
-  // so prices can't be tampered with in the browser.
-  const bookIds = cart.map((c) => c.id);
-  const books = await prisma.book.findMany({
-    where: { id: { in: bookIds } },
-  });
+  // so prices can't be tampered with in the browser. Books and offers
+  // are looked up separately since they're different tables.
+  const bookInputs = cart.filter((c) => (c.type ?? "book") === "book");
+  const offerInputs = cart.filter((c) => c.type === "offer");
 
-  if (books.length === 0) {
+  const books = bookInputs.length
+    ? await prisma.book.findMany({
+        where: { id: { in: bookInputs.map((c) => c.id) } },
+      })
+    : [];
+
+  const offers = offerInputs.length
+    ? await prisma.specialOffer.findMany({
+        where: { id: { in: offerInputs.map((c) => c.id) }, enabled: true },
+      })
+    : [];
+
+  if (books.length === 0 && offers.length === 0) {
     return NextResponse.json({ error: "Invalid cart" }, { status: 400 });
   }
 
-  const items = cart
+  const promoMap = await getPromotionPriceMap();
+
+  const bookItems = bookInputs
     .map((c) => {
       const book = books.find((b) => b.id === c.id);
       if (!book) return null;
       return {
-        bookId: book.id,
+        bookId: book.id as number | null,
+        offerId: null as number | null,
         title: book.title,
-        price: book.price,
+        price: getEffectivePrice(book.id, book.price, promoMap),
         quantity: Math.max(1, Math.floor(c.quantity)),
       };
     })
     .filter((i): i is NonNullable<typeof i> => i !== null);
+
+  const offerItems = offerInputs
+    .map((c) => {
+      const offer = offers.find((o) => o.id === c.id);
+      if (!offer) return null;
+      return {
+        bookId: null as number | null,
+        offerId: offer.id as number | null,
+        title: offer.title,
+        price: offer.price,
+        quantity: Math.max(1, Math.floor(c.quantity)),
+      };
+    })
+    .filter((i): i is NonNullable<typeof i> => i !== null);
+
+  const items = [...bookItems, ...offerItems];
 
   if (items.length === 0) {
     return NextResponse.json({ error: "Invalid cart" }, { status: 400 });
@@ -76,6 +108,7 @@ export async function POST(req: NextRequest) {
       items: {
         create: items.map((i) => ({
           bookId: i.bookId,
+          offerId: i.offerId,
           title: i.title,
           price: i.price,
           quantity: i.quantity,

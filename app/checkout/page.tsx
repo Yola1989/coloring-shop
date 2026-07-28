@@ -32,7 +32,7 @@ export default function CheckoutPage() {
         city,
         address,
         notes,
-        cart: cart.map((i) => ({ id: i.id, quantity: i.quantity })),
+        cart: cart.map((i) => ({ id: i.id, type: i.type, quantity: i.quantity })),
       }),
     });
 
@@ -77,7 +77,7 @@ export default function CheckoutPage() {
         <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5">
           {cart.map((item) => (
             <div
-              key={item.id}
+              key={`${item.type}-${item.id}`}
               className="flex items-center justify-between py-1 text-sm"
             >
               <span className="text-gray-700">

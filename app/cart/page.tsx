@@ -28,7 +28,7 @@ export default function CartPage() {
           <div className="mt-8 space-y-6">
             {cart.map((item) => (
               <div
-                key={item.id}
+                key={`${item.type}-${item.id}`}
                 className="flex items-center gap-6 rounded-2xl border border-gray-200 p-4"
               >
                 <img
@@ -43,14 +43,14 @@ export default function CartPage() {
 
                   <div className="mt-3 flex items-center gap-3">
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.id, item.type, item.quantity - 1)}
                       className="h-8 w-8 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
                     >
                       −
                     </button>
                     <span className="w-6 text-center">{item.quantity}</span>
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)}
                       className="h-8 w-8 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
                     >
                       +
@@ -63,7 +63,7 @@ export default function CartPage() {
                     {item.price * item.quantity} DH
                   </p>
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.id, item.type)}
                     className="mt-2 text-sm text-red-500 hover:underline"
                   >
                     Remove

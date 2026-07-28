@@ -20,50 +20,46 @@ export default function BookCard({
   const { addToCart } = useCart();
 
   function handleAddToCart() {
-    addToCart({ id, title, price, cover });
+    addToCart({ id, type: "book", title, price, cover });
     alert("Book added to cart ✅");
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:rounded-3xl">
 
       <img
         src={cover}
         alt={title}
-        className="h-80 w-full object-cover"
+        className="h-40 w-full object-cover sm:h-56 md:h-80"
       />
 
-      <div className="p-6">
+      <div className="p-3 sm:p-5 md:p-6">
 
-        <h3 className="text-2xl font-bold text-gray-900">
+        <h3 className="text-sm font-bold text-gray-900 sm:text-lg md:text-2xl">
           {title}
         </h3>
 
-        <p className="mt-2 text-sm text-gray-500">
-          Printable PDF Coloring Book
-        </p>
-
-        <p className="mt-2 text-xl font-bold text-orange-500">
+        <p className="mt-1 text-base font-bold text-orange-500 sm:mt-2 sm:text-lg md:text-xl">
           {price} DH
         </p>
 
-        <div className="mt-3 space-y-1 text-sm text-gray-500">
+        <div className="mt-2 hidden space-y-1 text-sm text-gray-500 sm:block">
           <p>⭐ Ages 2–5</p>
           <p>📄 40 Pages</p>
         </div>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-3 space-y-2 sm:mt-6 sm:space-y-3">
 
           <Link
             href={`/books/${id}`}
-            className="block w-full rounded-xl border border-orange-500 py-3 text-center font-semibold text-orange-500 transition hover:bg-orange-50"
+            className="block w-full rounded-xl border border-orange-500 py-2 text-center text-xs font-semibold text-orange-500 transition hover:bg-orange-50 sm:py-3 sm:text-base"
           >
             View Details
           </Link>
 
           <button
             onClick={handleAddToCart}
-            className="w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition hover:bg-orange-600"
+            className="w-full rounded-xl bg-orange-500 py-2 text-xs font-semibold text-white transition hover:bg-orange-600 sm:py-3 sm:text-base"
           >
             Add to Cart
           </button>

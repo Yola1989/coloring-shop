@@ -12,6 +12,7 @@ type BookFormValues = {
   pages: number;
   age: string;
   preview: string[];
+  videoUrl?: string | null;
 };
 
 export default function BookForm({
@@ -31,11 +32,13 @@ export default function BookForm({
       pages: 40,
       age: "2-5",
       preview: [],
+      videoUrl: "",
     }
   );
 
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingPreview, setUploadingPreview] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -94,6 +97,23 @@ export default function BookForm({
     setValues((v) => ({ ...v, preview: v.preview.filter((p) => p !== url) }));
   }
 
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingVideo(true);
+    setError("");
+
+    try {
+      const url = await uploadFile(file);
+      setValues((v) => ({ ...v, videoUrl: url }));
+    } catch {
+      setError("Video upload failed. Try again.");
+    } finally {
+      setUploadingVideo(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -119,7 +139,8 @@ export default function BookForm({
     setSaving(false);
 
     if (!res.ok) {
-      setError("Failed to save the book.");
+      const data = await res.json().catch(() => null);
+      setError(data?.detail || data?.error || "Failed to save the book.");
       return;
     }
 
@@ -133,20 +154,20 @@ export default function BookForm({
       className="mt-8 space-y-6 rounded-3xl border border-gray-200 bg-white p-8"
     >
       <div>
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-gray-800">
           Title
         </label>
         <input
           required
           value={values.title}
           onChange={(e) => setValues((v) => ({ ...v, title: e.target.value }))}
-          className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+          className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
         />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-gray-800">
             Price (DH)
           </label>
           <input
@@ -156,12 +177,12 @@ export default function BookForm({
             onChange={(e) =>
               setValues((v) => ({ ...v, price: Number(e.target.value) }))
             }
-            className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+            className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-gray-800">
             Pages
           </label>
           <input
@@ -171,12 +192,12 @@ export default function BookForm({
             onChange={(e) =>
               setValues((v) => ({ ...v, pages: Number(e.target.value) }))
             }
-            className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+            className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-gray-800">
             Ages
           </label>
           <input
@@ -184,13 +205,13 @@ export default function BookForm({
             placeholder="2-5"
             value={values.age}
             onChange={(e) => setValues((v) => ({ ...v, age: e.target.value }))}
-            className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+            className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-gray-800">
           Description
         </label>
         <textarea
@@ -200,12 +221,12 @@ export default function BookForm({
           onChange={(e) =>
             setValues((v) => ({ ...v, description: e.target.value }))
           }
-          className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+          className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-gray-800">
           Cover Image
         </label>
         <input
@@ -227,7 +248,7 @@ export default function BookForm({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-gray-800">
           Preview Images (inside pages)
         </label>
         <input
@@ -262,11 +283,64 @@ export default function BookForm({
         )}
       </div>
 
+      <div>
+        <label className="block text-sm font-semibold text-gray-800">
+          Product Video (optional)
+        </label>
+        <p className="mt-1 text-xs text-gray-500">
+          Paste a YouTube or Vimeo link, or upload a video file (e.g. a
+          30s clip from your phone) directly.
+        </p>
+
+        <input
+          type="url"
+          placeholder="https://youtube.com/shorts/... or https://vimeo.com/..."
+          value={values.videoUrl ?? ""}
+          onChange={(e) =>
+            setValues((v) => ({ ...v, videoUrl: e.target.value }))
+          }
+          className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
+        />
+
+        <div className="mt-3 flex items-center gap-3">
+          <span className="text-xs text-gray-400">or</span>
+          <input
+            type="file"
+            accept="video/*"
+            onChange={handleVideoUpload}
+            className="block flex-1 text-sm"
+          />
+        </div>
+        {uploadingVideo && (
+          <p className="mt-2 text-sm text-gray-500">Uploading video...</p>
+        )}
+
+        {values.videoUrl && (
+          <div className="mt-3 flex items-center gap-3">
+            <p className="truncate text-xs text-gray-500">
+              {values.videoUrl}
+            </p>
+            <button
+              type="button"
+              onClick={() => setValues((v) => ({ ...v, videoUrl: "" }))}
+              className="shrink-0 text-xs font-semibold text-red-500 hover:underline"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+
+        <p className="mt-2 text-xs text-gray-500">
+          Leave empty to hide the video section on the book page — it
+          appears automatically once a video is set.
+        </p>
+      </div>
+
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <button
         type="submit"
-        disabled={saving || uploadingCover || uploadingPreview}
+        disabled={saving || uploadingCover || uploadingPreview || uploadingVideo}
         className="w-full rounded-xl bg-orange-500 py-4 font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
       >
         {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Book"}

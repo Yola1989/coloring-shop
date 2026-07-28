@@ -62,9 +62,13 @@ If left empty, orders still work — the app just skips sending the email
 and logs a warning, so checkout is never blocked by missing SMTP config.
 
 ## 4c. Update the database for Orders
-The schema now includes `Order` and `OrderItem` tables. Push it again:
+The schema now includes `Order` and `OrderItem` tables (with `bookId` and
+`offerId`), an optional `videoUrl` field on `Book`, a `Promotion` table,
+a `SpecialOffer` table, and a `Settings` table (WhatsApp number). Push it
+again whenever the schema changes:
 ```
 npx prisma db push
+npx prisma generate
 ```
 
 ## 5. Run

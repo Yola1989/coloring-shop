@@ -2,8 +2,11 @@
 
 import { createContext, useContext, useState } from "react";
 
+export type CartItemType = "book" | "offer";
+
 export type CartItem = {
   id: number;
+  type: CartItemType;
   title: string;
   price: number;
   cover: string;
@@ -13,8 +16,8 @@ export type CartItem = {
 type CartContextType = {
   cart: CartItem[];
   addToCart: (item: Omit<CartItem, "quantity">) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeFromCart: (id: number, type: CartItemType) => void;
+  updateQuantity: (id: number, type: CartItemType, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -31,11 +34,15 @@ export function CartProvider({
 
   function addToCart(item: Omit<CartItem, "quantity">) {
     setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+      const existing = prev.find(
+        (i) => i.id === item.id && i.type === item.type
+      );
 
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id && i.type === item.type
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
         );
       }
 
@@ -43,18 +50,20 @@ export function CartProvider({
     });
   }
 
-  function removeFromCart(id: number) {
-    setCart((prev) => prev.filter((i) => i.id !== id));
+  function removeFromCart(id: number, type: CartItemType) {
+    setCart((prev) => prev.filter((i) => !(i.id === id && i.type === type)));
   }
 
-  function updateQuantity(id: number, quantity: number) {
+  function updateQuantity(id: number, type: CartItemType, quantity: number) {
     if (quantity < 1) {
-      removeFromCart(id);
+      removeFromCart(id, type);
       return;
     }
 
     setCart((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
+      prev.map((i) =>
+        i.id === id && i.type === type ? { ...i, quantity } : i
+      )
     );
   }
 

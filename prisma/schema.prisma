@@ -16,6 +16,7 @@ model Book {
   pages       Int
   age         String
   preview     String[]
+  videoUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   orderItems  OrderItem[]
@@ -50,9 +51,48 @@ model OrderItem {
   orderId    Int
   book       Book?    @relation(fields: [bookId], references: [id], onDelete: SetNull)
   bookId     Int?
-  // Snapshot of book data at order time, so edits/deletes to the book
-  // later don't change historical orders.
+  offerId    Int?
+  // Snapshot of book/offer data at order time, so edits/deletes to the
+  // book or offer later don't change historical orders.
   title      String
   price      Int
   quantity   Int
+}
+
+// A single, simple homepage promotion banner ("Books Promotion" in the
+// admin). No relation to Book on purpose — book1Id/book2Id are plain
+// references so this model stays self-contained and easy to extend later.
+model Promotion {
+  id          Int      @id @default(autoincrement())
+  enabled     Boolean  @default(false)
+  title       String   @default("")
+  description String   @default("")
+  book1Id     Int?
+  book1Price  Int?
+  book2Id     Int?
+  book2Price  Int?
+  updatedAt   DateTime @updatedAt
+}
+
+// Independent from Promotion/books — for bundles and future non-book
+// products. Modeled as a normal list (not fixed slots) so adding a 3rd,
+// 4th, etc. offer later needs no schema or code changes, just a new row.
+model SpecialOffer {
+  id          Int      @id @default(autoincrement())
+  enabled     Boolean  @default(false)
+  title       String
+  description String
+  imageUrl    String
+  price       Int
+  oldPrice    Int?
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Single-row site settings, same pattern as Promotion. New settings
+// (beyond whatsappNumber) can be added later as new optional columns.
+model Settings {
+  id             Int    @id @default(autoincrement())
+  whatsappNumber String @default("")
 }

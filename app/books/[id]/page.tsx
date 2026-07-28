@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import AddToCartButton from "@/components/AddToCartButton";
+import PreviewGallery from "@/components/PreviewGallery";
+import ProductVideo from "@/components/ProductVideo";
+import { getPromotionPriceMap, getEffectivePrice } from "@/lib/pricing";
 
 type Props = {
   params: Promise<{
@@ -19,6 +22,10 @@ export default async function BookDetails({ params }: Props) {
     notFound();
   }
 
+  const promoMap = await getPromotionPriceMap();
+  const effectivePrice = getEffectivePrice(book.id, book.price, promoMap);
+  const onPromotion = effectivePrice !== book.price;
+
  return (
   <main className="mx-auto max-w-7xl px-6 py-12">
     <div className="grid gap-12 lg:grid-cols-2">
@@ -31,15 +38,8 @@ export default async function BookDetails({ params }: Props) {
           className="mx-auto w-full max-w-md rounded-3xl border border-gray-200 shadow-lg"
         />
 
-        <div className="mt-6 grid grid-cols-3 gap-4">
-          {book.preview.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Preview ${index + 1}`}
-              className="aspect-[3/4] rounded-xl border border-gray-200 object-cover"
-            />
-          ))}
+        <div className="mt-6">
+          <PreviewGallery images={book.preview} title={book.title} />
         </div>
       </div>
 
@@ -49,16 +49,23 @@ export default async function BookDetails({ params }: Props) {
           {book.title}
         </h1>
 
-        <p className="mt-4 text-lg text-orange-500 font-bold">
-          {book.price} DH
-        </p>
+        <div className="mt-4 flex items-center gap-3">
+          <p className="text-lg font-bold text-orange-500">
+            {effectivePrice} DH
+          </p>
+          {onPromotion && (
+            <p className="text-base text-gray-400 line-through">
+              {book.price} DH
+            </p>
+          )}
+        </div>
 
-        <div className="mt-6 space-y-2 text-gray-600">
+        <div className="mt-6 space-y-2 text-gray-700">
           <p>⭐ Ages {book.age}</p>
           <p>📄 {book.pages} Pages</p>
         </div>
 
-        <p className="mt-8 leading-8 text-gray-700">
+        <p className="mt-8 leading-8 text-gray-800">
           {book.description}
         </p>
 
@@ -66,10 +73,12 @@ export default async function BookDetails({ params }: Props) {
           <AddToCartButton
             id={book.id}
             title={book.title}
-            price={book.price}
+            price={effectivePrice}
             cover={book.cover}
           />
         </div>
+
+        <ProductVideo videoUrl={book.videoUrl} />
       </div>
 
     </div>

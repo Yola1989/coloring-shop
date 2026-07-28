@@ -13,26 +13,25 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const data = await req.json();
 
   try {
-    const book = await prisma.book.update({
+    const offer = await prisma.specialOffer.update({
       where: { id: Number(id) },
       data: {
+        enabled: Boolean(data.enabled),
         title: data.title,
-        price: Number(data.price),
-        cover: data.cover,
         description: data.description,
-        pages: Number(data.pages),
-        age: data.age,
-        preview: data.preview ?? [],
-        videoUrl: data.videoUrl || null,
+        imageUrl: data.imageUrl,
+        price: Number(data.price),
+        oldPrice: data.oldPrice ? Number(data.oldPrice) : null,
+        position: Number(data.position ?? 0),
       },
     });
 
-    return NextResponse.json(book);
+    return NextResponse.json(offer);
   } catch (err) {
-    console.error("Failed to update book:", err);
+    console.error("Failed to update offer:", err);
     return NextResponse.json(
       {
-        error: "Failed to update book",
+        error: "Failed to update offer",
         detail: err instanceof Error ? err.message : String(err),
       },
       { status: 500 }
@@ -46,7 +45,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   }
 
   const { id } = await params;
-  await prisma.book.delete({ where: { id: Number(id) } });
+  await prisma.specialOffer.delete({ where: { id: Number(id) } });
 
   return NextResponse.json({ ok: true });
 }

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useCart } from "@/context/CartContext";
+import { useCart, CartItemType } from "@/context/CartContext";
 
 type AddToCartButtonProps = {
   id: number;
   title: string;
   price: number;
   cover: string;
+  type?: CartItemType;
 };
 
 export default function AddToCartButton({
@@ -15,12 +16,13 @@ export default function AddToCartButton({
   title,
   price,
   cover,
+  type = "book",
 }: AddToCartButtonProps) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
-    addToCart({ id, title, price, cover });
+    addToCart({ id, type, title, price, cover });
     setAdded(true);
 
     setTimeout(() => {
@@ -39,7 +41,7 @@ export default function AddToCartButton({
 
       {added && (
         <p className="mt-4 rounded-xl bg-green-100 py-3 text-center font-medium text-green-700">
-          ✅ Book added to cart
+          ✅ Added to cart
         </p>
       )}
     </>

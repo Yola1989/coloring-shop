@@ -25,3 +25,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   return NextResponse.json(order);
 }
+
+export async function DELETE(req: NextRequest, { params }: Params) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  await prisma.order.delete({ where: { id: Number(id) } });
+
+  return NextResponse.json({ ok: true });
+}

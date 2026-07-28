@@ -3,8 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function GET() {
-  const books = await prisma.book.findMany({ orderBy: { id: "asc" } });
-  return NextResponse.json(books);
+  const offers = await prisma.specialOffer.findMany({
+    orderBy: { position: "asc" },
+  });
+  return NextResponse.json(offers);
 }
 
 export async function POST(req: NextRequest) {
@@ -15,25 +17,24 @@ export async function POST(req: NextRequest) {
   const data = await req.json();
 
   try {
-    const book = await prisma.book.create({
+    const offer = await prisma.specialOffer.create({
       data: {
+        enabled: Boolean(data.enabled),
         title: data.title,
-        price: Number(data.price),
-        cover: data.cover,
         description: data.description,
-        pages: Number(data.pages),
-        age: data.age,
-        preview: data.preview ?? [],
-        videoUrl: data.videoUrl || null,
+        imageUrl: data.imageUrl,
+        price: Number(data.price),
+        oldPrice: data.oldPrice ? Number(data.oldPrice) : null,
+        position: Number(data.position ?? 0),
       },
     });
 
-    return NextResponse.json(book, { status: 201 });
+    return NextResponse.json(offer, { status: 201 });
   } catch (err) {
-    console.error("Failed to create book:", err);
+    console.error("Failed to create offer:", err);
     return NextResponse.json(
       {
-        error: "Failed to create book",
+        error: "Failed to create offer",
         detail: err instanceof Error ? err.message : String(err),
       },
       { status: 500 }

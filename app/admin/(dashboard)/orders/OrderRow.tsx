@@ -39,6 +39,7 @@ export default function OrderRow({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState(order.status);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleStatusChange(newStatus: string) {
     setSaving(true);
@@ -57,6 +58,27 @@ export default function OrderRow({ order }: { order: Order }) {
     } else {
       setStatus(order.status);
       alert("Failed to update status.");
+    }
+  }
+
+  async function handleDelete() {
+    const confirmed = confirm(
+      `Delete order #${order.orderNumber}? This can't be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+
+    const res = await fetch(`/api/admin/orders/${order.id}`, {
+      method: "DELETE",
+    });
+
+    setDeleting(false);
+
+    if (res.ok) {
+      router.refresh();
+    } else {
+      alert("Failed to delete the order.");
     }
   }
 
@@ -94,6 +116,18 @@ export default function OrderRow({ order }: { order: Order }) {
               </option>
             ))}
           </select>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
+            }}
+            disabled={deleting}
+            className="rounded-xl border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </button>
         </div>
       </div>
 
