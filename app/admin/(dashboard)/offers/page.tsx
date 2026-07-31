@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteOfferButton from "./DeleteOfferButton";
@@ -12,7 +13,9 @@ export default async function AdminOffersPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Special Offers</h1>
+        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+          Special Offers
+        </h1>
         <Link
           href="/admin/offers/new"
           className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white hover:bg-orange-600 transition"
@@ -36,9 +39,11 @@ export default async function AdminOffersPage() {
               key={offer.id}
               className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4"
             >
-              <img
+              <Image
                 src={offer.imageUrl}
                 alt={offer.title}
+                width={80}
+                height={80}
                 className="h-20 w-20 rounded-lg object-cover"
               />
 

@@ -6,7 +6,7 @@ type FooterProps = {
 // customers who have questions before purchasing.
 export default function Footer({ phoneNumber }: FooterProps) {
   const message = encodeURIComponent(
-    "Hello! I have a question about one of your coloring books."
+    "السلام! عندي سؤال بخصوص كتب التلوين ديالكم."
   );
   const href = phoneNumber
     ? `https://wa.me/${phoneNumber.replace(/[^\d]/g, "")}?text=${message}`
@@ -14,18 +14,20 @@ export default function Footer({ phoneNumber }: FooterProps) {
 
   return (
     <footer className="mt-20 border-t border-gray-200 bg-white">
-      <div className="mx-auto max-w-7xl px-6 py-10 text-center">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 text-center sm:px-6">
         
-       <h1>🎨 Thank you for visiting LawenBook!</h1> 
+        <p className="text-lg font-bold text-gray-900">🎨 شكراً لزيارتك LawenBook!</p> 
 
-        We hope our LawenBooks bring creativity and joy to every child.
+        <p className="mt-2 text-sm text-gray-600">
+          نتمنى أن تجلب كتبنا الإبداع والفرح للصغار والكبار على حد سواء.
+        </p>
 
-         <h1>Made with ❤️ by Younes Ahdidou</h1>
 
-        <h3 className="text-lg font-bold text-gray-900">Need Help?</h3>
+
+        <h2 className="mt-8 text-lg font-bold text-gray-900">هل تحتاج مساعدة؟</h2>
         <p className="mt-2 text-sm text-gray-500">
           
-          Have a question before you order? We&apos;re happy to help.
+          عندك سؤال قبل الطلب؟ يسعدنا مساعدتك.
         </p>
 
         {href && (
@@ -37,12 +39,12 @@ export default function Footer({ phoneNumber }: FooterProps) {
           >
 
           
-            💬 Chat with us on WhatsApp
+            💬 تواصل معنا عبر واتساب
           </a>
         )}
 
         <p className="mt-8 text-xs text-gray-400">
-          © {new Date().getFullYear()} LawenBook
+          © {new Date().getFullYear()} LawenBook — Made with ❤️ by Younes Ahdidou
         </p>
       </div>
     </footer>

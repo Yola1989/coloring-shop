@@ -17,8 +17,15 @@ function sessionToken() {
   return crypto.createHash("sha256").update(getSecret()).digest("hex");
 }
 
+// Compare hashes with a constant-time function so an attacker cannot
+// learn the password one character at a time by measuring response time.
 export function checkPassword(input: string) {
-  return input === getSecret();
+  if (typeof input !== "string" || input.length === 0) return false;
+
+  const given = crypto.createHash("sha256").update(input).digest();
+  const expected = crypto.createHash("sha256").update(getSecret()).digest();
+
+  return crypto.timingSafeEqual(given, expected);
 }
 
 export async function createSession() {

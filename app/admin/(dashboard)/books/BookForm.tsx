@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -239,9 +240,11 @@ export default function BookForm({
           <p className="mt-2 text-sm text-gray-500">Uploading...</p>
         )}
         {values.cover && (
-          <img
+          <Image
             src={values.cover}
             alt="Cover preview"
+            width={96}
+            height={128}
             className="mt-3 h-32 w-24 rounded-lg object-cover"
           />
         )}
@@ -265,9 +268,11 @@ export default function BookForm({
           <div className="mt-3 flex flex-wrap gap-3">
             {values.preview.map((url) => (
               <div key={url} className="relative">
-                <img
+                <Image
                   src={url}
-                  alt="Preview"
+                  alt="Preview page"
+                  width={80}
+                  height={96}
                   className="h-24 w-20 rounded-lg object-cover"
                 />
                 <button

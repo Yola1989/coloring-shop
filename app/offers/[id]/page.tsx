@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Header from "@/components/Header";
@@ -29,10 +30,14 @@ export default async function OfferDetails({ params }: Props) {
       <main className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <img
+            <Image
               src={offer.imageUrl}
               alt={offer.title}
-              className="mx-auto w-full max-w-md rounded-3xl border border-gray-200 shadow-lg"
+              width={800}
+              height={800}
+              priority
+              sizes="(max-width: 1024px) 100vw, 448px"
+              className="mx-auto h-auto w-full max-w-md rounded-3xl border border-gray-200 shadow-lg"
             />
           </div>
 

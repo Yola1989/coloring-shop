@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function GET() {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const offers = await prisma.specialOffer.findMany({
     orderBy: { position: "asc" },
   });
@@ -35,7 +39,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to create offer",
-        detail: err instanceof Error ? err.message : String(err),
+        // Raw Prisma messages leak table/column names — dev only.
+        ...(process.env.NODE_ENV !== "production" && {
+          detail: err instanceof Error ? err.message : String(err),
+        }),
       },
       { status: 500 }
     );

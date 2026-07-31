@@ -10,9 +10,19 @@ type CartInput = {
   quantity: number;
 };
 
+// Moroccan numbers: 05/06/07 + 8 digits, or the +212 international form.
+const PHONE_RE = /^(?:\+212|0)[5-7]\d{8}$/;
+
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { fullName, phone, city, address, notes, cart } = body as {
+  // A malformed body must not crash the route with an unhandled rejection.
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "طلب غير صالح." }, { status: 400 });
+  }
+
+  const { fullName, phone, city, address, notes, cart } = (body ?? {}) as {
     fullName: string;
     phone: string;
     city: string;
@@ -23,7 +33,23 @@ export async function POST(req: NextRequest) {
 
   if (!fullName || !phone || !city || !address) {
     return NextResponse.json(
-      { error: "Missing required fields" },
+      { error: "المرجو ملء جميع الحقول المطلوبة." },
+      { status: 400 }
+    );
+  }
+
+  // Never trust client-side validation alone.
+  const cleanPhone = String(phone).replace(/[\s.\-()]/g, "");
+  if (!PHONE_RE.test(cleanPhone)) {
+    return NextResponse.json(
+      { error: "رقم الهاتف غير صحيح. مثال: 0612345678" },
+      { status: 400 }
+    );
+  }
+
+  if (String(fullName).trim().length < 3) {
+    return NextResponse.json(
+      { error: "المرجو إدخال الاسم الكامل." },
       { status: 400 }
     );
   }
@@ -98,8 +124,8 @@ export async function POST(req: NextRequest) {
   const order = await prisma.order.create({
     data: {
       orderNumber: generateOrderNumber(),
-      fullName,
-      phone,
+      fullName: String(fullName).trim(),
+      phone: cleanPhone,
       city,
       address,
       notes: notes || null,

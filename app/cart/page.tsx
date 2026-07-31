@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
@@ -11,79 +12,97 @@ export default function CartPage() {
     <>
       <Header />
 
-      <main className="mx-auto max-w-4xl px-6 py-10">
-        <h1 className="text-3xl font-bold text-gray-900">Your Cart</h1>
+      <main dir="rtl" className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">سلة المشتريات</h1>
 
         {cart.length === 0 ? (
           <div className="mt-10 text-center">
-            <p className="text-gray-500">Your cart is empty.</p>
+            <p className="text-gray-500">السلة فارغة.</p>
             <Link
               href="/"
-              className="mt-6 inline-block rounded-xl bg-orange-500 px-6 py-3 font-semibold text-white hover:bg-orange-600 transition"
+              className="mt-6 inline-block rounded-xl bg-orange-500 px-6 py-3 font-semibold text-white transition hover:bg-orange-600"
             >
-              Browse Books
+              تصفح الكتب
             </Link>
           </div>
         ) : (
-          <div className="mt-8 space-y-6">
+          <div className="mt-8 space-y-4 sm:space-y-6">
             {cart.map((item) => (
               <div
                 key={`${item.type}-${item.id}`}
-                className="flex items-center gap-6 rounded-2xl border border-gray-200 p-4"
+                className="flex items-center gap-3 rounded-2xl border border-gray-200 p-3 sm:gap-6 sm:p-4"
               >
-                <img
+                <Image
                   src={item.cover}
                   alt={item.title}
-                  className="h-24 w-20 rounded-lg object-cover"
+                  width={80}
+                  height={96}
+                  className="h-20 w-16 shrink-0 rounded-lg object-cover sm:h-24 sm:w-20"
                 />
 
-                <div className="flex-1">
-                  <h2 className="font-bold text-gray-900">{item.title}</h2>
-                  <p className="text-sm text-gray-500">{item.price} DH</p>
+                {/* min-w-0 lets long titles wrap instead of widening the row. */}
+                <div className="min-w-0 flex-1">
+                  <h2 className="break-words text-sm font-bold text-gray-900 sm:text-base">
+                    {item.title}
+                  </h2>
+                  <p className="text-xs text-gray-500 sm:text-sm">
+                    {item.price} د.م
+                  </p>
 
-                  <div className="mt-3 flex items-center gap-3">
+                  <div className="mt-2 flex items-center gap-2 sm:mt-3 sm:gap-3">
                     <button
-                      onClick={() => updateQuantity(item.id, item.type, item.quantity - 1)}
-                      className="h-8 w-8 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
+                      type="button"
+                      aria-label="إنقاص الكمية"
+                      onClick={() =>
+                        updateQuantity(item.id, item.type, item.quantity - 1)
+                      }
+                      className="h-8 w-8 shrink-0 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
                     >
                       −
                     </button>
-                    <span className="w-6 text-center">{item.quantity}</span>
+                    <span className="w-6 text-center text-sm">{item.quantity}</span>
                     <button
-                      onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)}
-                      className="h-8 w-8 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
+                      type="button"
+                      aria-label="زيادة الكمية"
+                      onClick={() =>
+                        updateQuantity(item.id, item.type, item.quantity + 1)
+                      }
+                      className="h-8 w-8 shrink-0 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
                     >
                       +
                     </button>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">
-                    {item.price * item.quantity} DH
+                <div className="shrink-0 text-left">
+                  <p className="whitespace-nowrap text-sm font-bold text-gray-900 sm:text-base">
+                    {item.price * item.quantity} د.م
                   </p>
                   <button
+                    type="button"
                     onClick={() => removeFromCart(item.id, item.type)}
-                    className="mt-2 text-sm text-red-500 hover:underline"
+                    className="mt-2 text-xs text-red-500 hover:underline sm:text-sm"
                   >
-                    Remove
+                    حذف
                   </button>
                 </div>
               </div>
             ))}
 
             <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-              <span className="text-xl font-bold text-gray-900">Total</span>
-              <span className="text-xl font-bold text-orange-500">
-                {totalPrice} DH
+              <span className="text-lg font-bold text-gray-900 sm:text-xl">
+                المجموع
+              </span>
+              <span className="text-lg font-bold text-orange-500 sm:text-xl">
+                {totalPrice} د.م
               </span>
             </div>
 
             <Link
               href="/checkout"
-              className="block w-full rounded-xl bg-orange-500 py-4 text-center text-lg font-semibold text-white transition hover:bg-orange-600"
+              className="block w-full rounded-xl bg-orange-500 py-4 text-center text-base font-semibold text-white transition hover:bg-orange-600 sm:text-lg"
             >
-              Checkout
+              متابعة الطلب
             </Link>
           </div>
         )}

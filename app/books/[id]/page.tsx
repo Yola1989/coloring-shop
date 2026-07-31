@@ -1,5 +1,8 @@
+import Image from "next/image";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import Header from "@/components/Header";
 import AddToCartButton from "@/components/AddToCartButton";
 import PreviewGallery from "@/components/PreviewGallery";
 import ProductVideo from "@/components/ProductVideo";
@@ -12,6 +15,31 @@ type Props = {
 };
 
 export const dynamic = "force-dynamic";
+
+// Per-book title/description/preview image, so every product page has its
+// own entry in Google and its own preview card on WhatsApp and Facebook.
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const book = await prisma.book.findUnique({ where: { id: Number(id) } });
+
+  if (!book) {
+    return { title: "الكتاب غير موجود" };
+  }
+
+  const description = book.description.slice(0, 155);
+
+  return {
+    title: book.title,
+    description,
+    alternates: { canonical: `/books/${book.id}` },
+    openGraph: {
+      type: "article",
+      title: book.title,
+      description,
+      images: book.cover ? [{ url: book.cover, alt: book.title }] : undefined,
+    },
+  };
+}
 
 export default async function BookDetails({ params }: Props) {
   const { id } = await params;
@@ -27,15 +55,22 @@ export default async function BookDetails({ params }: Props) {
   const onPromotion = effectivePrice !== book.price;
 
  return (
-  <main className="mx-auto max-w-7xl px-6 py-12">
+  <>
+    <Header />
+
+    <main className="mx-auto max-w-7xl px-6 py-12">
     <div className="grid gap-12 lg:grid-cols-2">
 
       {/* Cover */}
       <div>
-        <img
+        <Image
           src={book.cover}
-          alt={book.title}
-          className="mx-auto w-full max-w-md rounded-3xl border border-gray-200 shadow-lg"
+          alt={`غلاف كتاب التلوين ${book.title}`}
+          width={800}
+          height={1000}
+          priority
+          sizes="(max-width: 1024px) 100vw, 448px"
+          className="mx-auto h-auto w-full max-w-md rounded-3xl border border-gray-200 shadow-lg"
         />
 
         <div className="mt-6">
@@ -61,8 +96,8 @@ export default async function BookDetails({ params }: Props) {
         </div>
 
         <div className="mt-6 space-y-2 text-gray-700">
-          <p>⭐ Ages {book.age}</p>
-          <p>📄 {book.pages} Pages</p>
+          <p>⭐ الأعمار {book.age}</p>
+          <p>📄 {book.pages} صفحة</p>
         </div>
 
         <p className="mt-8 leading-8 text-gray-800">
@@ -82,6 +117,7 @@ export default async function BookDetails({ params }: Props) {
       </div>
 
     </div>
-  </main>
+    </main>
+  </>
 );
 }

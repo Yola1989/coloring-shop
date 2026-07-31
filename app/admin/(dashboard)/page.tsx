@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteBookButton from "./DeleteBookButton";
@@ -28,9 +29,11 @@ export default async function AdminBooksPage() {
               key={book.id}
               className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4"
             >
-              <img
+              <Image
                 src={book.cover}
                 alt={book.title}
+                width={64}
+                height={80}
                 className="h-20 w-16 rounded-lg object-cover"
               />
 

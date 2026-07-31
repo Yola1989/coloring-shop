@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -197,9 +198,11 @@ export default function OfferForm({
           <p className="mt-2 text-sm text-gray-500">Uploading...</p>
         )}
         {values.imageUrl && (
-          <img
+          <Image
             src={values.imageUrl}
-            alt="Offer preview"
+            alt="Offer image preview"
+            width={96}
+            height={96}
             className="mt-3 h-24 w-24 rounded-lg object-cover"
           />
         )}

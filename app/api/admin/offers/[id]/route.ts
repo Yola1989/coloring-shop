@@ -32,7 +32,10 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json(
       {
         error: "Failed to update offer",
-        detail: err instanceof Error ? err.message : String(err),
+        // Raw Prisma messages leak table/column names — dev only.
+        ...(process.env.NODE_ENV !== "production" && {
+          detail: err instanceof Error ? err.message : String(err),
+        }),
       },
       { status: 500 }
     );
@@ -45,7 +48,11 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   }
 
   const { id } = await params;
-  await prisma.specialOffer.delete({ where: { id: Number(id) } });
+  try {
+    await prisma.specialOffer.delete({ where: { id: Number(id) } });
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   return NextResponse.json({ ok: true });
 }

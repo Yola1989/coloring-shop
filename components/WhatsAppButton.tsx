@@ -8,7 +8,7 @@ export default function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
   if (!phoneNumber) return null;
 
   const message = encodeURIComponent(
-    "Hello! I have a question about one of your coloring books."
+    "السلام! عندي سؤال بخصوص كتب التلوين ديالكم."
   );
   const href = `https://wa.me/${phoneNumber.replace(/[^\d]/g, "")}?text=${message}`;
 
@@ -17,7 +17,7 @@ export default function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Chat with us on WhatsApp"
+      aria-label="تواصل معنا عبر واتساب"
       className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-2xl text-white shadow-lg transition hover:bg-green-600"
     >
       💬

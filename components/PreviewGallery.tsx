@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 type PreviewGalleryProps = {
@@ -86,11 +87,15 @@ export default function PreviewGallery({ images, title }: PreviewGalleryProps) {
             className="group"
             aria-label={`Open preview ${index + 1} of ${title}`}
           >
-            <img
-              src={image}
-              alt={`Preview ${index + 1}`}
-              className="aspect-[3/4] w-full rounded-xl border border-gray-200 object-cover transition group-hover:opacity-80"
-            />
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-gray-200">
+              <Image
+                src={image}
+                alt={`معاينة ${index + 1} من ${title}`}
+                fill
+                sizes="(max-width: 640px) 33vw, 160px"
+                className="object-cover transition group-hover:opacity-80"
+              />
+            </div>
           </button>
         ))}
       </div>
@@ -123,13 +128,17 @@ export default function PreviewGallery({ images, title }: PreviewGalleryProps) {
             </button>
           )}
 
-          <img
+          <Image
             src={images[openIndex]}
-            alt={`Preview ${openIndex + 1} of ${title}`}
+            alt={`معاينة ${openIndex + 1} من ${title}`}
+            width={1200}
+            height={1600}
+            sizes="95vw"
+            priority
             onClick={(e) => e.stopPropagation()}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            className="max-h-[90vh] max-w-[95vw] rounded-lg object-contain shadow-2xl select-none"
+            className="h-auto max-h-[90vh] w-auto max-w-[95vw] rounded-lg object-contain shadow-2xl select-none"
           />
 
           {images.length > 1 && (

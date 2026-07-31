@@ -45,7 +45,10 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to update promotion",
-        detail: err instanceof Error ? err.message : String(err),
+        // Raw Prisma messages leak table/column names — dev only.
+        ...(process.env.NODE_ENV !== "production" && {
+          detail: err instanceof Error ? err.message : String(err),
+        }),
       },
       { status: 500 }
     );

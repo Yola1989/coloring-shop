@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type SpecialOffer = {
@@ -23,10 +24,10 @@ export default function SpecialOffersSection({
   return (
     <section
       id="special-offers"
-      className="mt-16 scroll-mt-28 rounded-3xl border-2 border-gray-900/10 bg-gray-50 px-6 py-10 md:px-12"
+      className="mt-16 scroll-mt-28 rounded-3xl border-2 border-gray-900/10 bg-gray-50 px-5 py-10 md:px-12"
     >
-      <h2 className="text-center text-3xl font-bold text-gray-900 md:text-left">
-        Special Offers
+      <h2 className="text-center text-2xl font-bold text-gray-900 sm:text-3xl md:text-left">
+        عروض خاصة
       </h2>
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -35,11 +36,15 @@ export default function SpecialOffersSection({
             key={offer.id}
             className="overflow-hidden rounded-2xl bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
           >
-            <img
-              src={offer.imageUrl}
-              alt={offer.title}
-              className="h-56 w-full object-cover sm:h-72"
-            />
+            <div className="relative h-56 w-full sm:h-72">
+              <Image
+                src={offer.imageUrl}
+                alt={offer.title}
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
 
             <div className="p-5">
               <p className="text-xl font-bold text-gray-900">
@@ -63,7 +68,7 @@ export default function SpecialOffersSection({
                 href={`/offers/${offer.id}`}
                 className="mt-4 block w-full rounded-xl border border-orange-500 py-3 text-center font-semibold text-orange-500 transition hover:bg-orange-50"
               >
-                View Details
+                عرض التفاصيل
               </Link>
             </div>
           </div>

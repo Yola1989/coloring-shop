@@ -32,7 +32,11 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   }
 
   const { id } = await params;
-  await prisma.order.delete({ where: { id: Number(id) } });
+  try {
+    await prisma.order.delete({ where: { id: Number(id) } });
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   return NextResponse.json({ ok: true });
 }
