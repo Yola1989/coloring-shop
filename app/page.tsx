@@ -3,6 +3,7 @@ import BookCard from "@/components/BookCard";
 import HeroIllustration from "@/components/HeroIllustration";
 import PromotionSection from "@/components/PromotionSection";
 import SpecialOffersSection from "@/components/SpecialOffersSection";
+import HomeVideo from "@/components/HomeVideo";
 import { prisma } from "@/lib/prisma";
 import { getPromotionPriceMap, getEffectivePrice } from "@/lib/pricing";
 
@@ -28,6 +29,8 @@ export default async function Home() {
     ...book,
     displayPrice: getEffectivePrice(book.id, book.price, promoMap),
   }));
+
+  const settings = await prisma.settings.findFirst();
 
   const specialOffers = await prisma.specialOffer.findMany({
     where: { enabled: true },
@@ -79,6 +82,8 @@ export default async function Home() {
             <HeroIllustration />
           </div>
         </section>
+
+        <HomeVideo videoUrl={settings?.homepageVideoUrl} />
 
         <SpecialOffersSection offers={specialOffers} />
 

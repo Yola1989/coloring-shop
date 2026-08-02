@@ -29,6 +29,7 @@ export async function PUT(req: NextRequest) {
       where: { id: current.id },
       data: {
         whatsappNumber: data.whatsappNumber || "",
+        homepageVideoUrl: data.homepageVideoUrl || "",
       },
     });
 

@@ -84,6 +84,7 @@ model SpecialOffer {
 }
 
 model Settings {
-  id             Int    @id @default(autoincrement())
-  whatsappNumber String @default("")
+  id               Int    @id @default(autoincrement())
+  whatsappNumber   String @default("")
+  homepageVideoUrl String @default("")
 }
