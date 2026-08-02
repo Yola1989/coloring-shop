@@ -100,7 +100,7 @@ export default async function BookDetails({ params }: Props) {
           <p>📄 {book.pages} صفحة</p>
         </div>
 
-        <p className="mt-8 leading-8 text-gray-800">
+        <p className="mt-8 leading-8 whitespace-pre-line text-gray-800">
           {book.description}
         </p>
 

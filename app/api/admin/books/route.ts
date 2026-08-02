@@ -7,7 +7,9 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const books = await prisma.book.findMany({ orderBy: { id: "asc" } });
+  const books = await prisma.book.findMany({
+    orderBy: [{ position: "asc" }, { id: "asc" }],
+  });
   return NextResponse.json(books);
 }
 

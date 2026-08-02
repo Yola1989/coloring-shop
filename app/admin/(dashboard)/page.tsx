@@ -2,11 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import DeleteBookButton from "./DeleteBookButton";
+import ReorderButtons from "./ReorderButtons";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminBooksPage() {
-  const books = await prisma.book.findMany({ orderBy: { id: "asc" } });
+  const books = await prisma.book.findMany({
+    orderBy: [{ position: "asc" }, { id: "asc" }],
+  });
 
   return (
     <div>
@@ -24,11 +27,17 @@ export default async function AdminBooksPage() {
         <p className="mt-10 text-gray-500">No books yet. Add your first one.</p>
       ) : (
         <div className="mt-8 space-y-4">
-          {books.map((book) => (
+          {books.map((book, index) => (
             <div
               key={book.id}
               className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4"
             >
+              <ReorderButtons
+                id={book.id}
+                isFirst={index === 0}
+                isLast={index === books.length - 1}
+              />
+
               <Image
                 src={book.cover}
                 alt={book.title}

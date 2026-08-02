@@ -31,7 +31,7 @@ export default function PromotionSection({
           <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
         )}
         {description && (
-          <p className="mt-2 text-gray-600">{description}</p>
+          <p className="mt-2 whitespace-pre-line text-gray-600">{description}</p>
         )}
       </div>
 

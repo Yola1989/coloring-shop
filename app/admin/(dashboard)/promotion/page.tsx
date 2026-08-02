@@ -9,7 +9,9 @@ export default async function AdminPromotionPage() {
     promotion = await prisma.promotion.create({ data: {} });
   }
 
-  const books = await prisma.book.findMany({ orderBy: { id: "asc" } });
+  const books = await prisma.book.findMany({
+    orderBy: [{ position: "asc" }, { id: "asc" }],
+  });
 
   return (
     <div>

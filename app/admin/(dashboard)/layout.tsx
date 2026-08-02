@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
 import LogoutButton from "./LogoutButton";
+import Logo from "@/components/Logo";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Books", icon: "📚" },
@@ -27,8 +28,8 @@ export default async function DashboardLayout({
       {/* Vertical sidebar, pinned to the left on tablet and desktop. */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-gray-200 bg-white md:flex">
         <div className="border-b border-gray-200 px-5 py-5">
-          <Link href="/admin" className="text-lg font-bold text-orange-500">
-            LawenBook
+          <Link href="/admin" className="block" aria-label="LawenBook">
+            <Logo className="h-12 w-44" />
           </Link>
           <p className="mt-0.5 text-xs text-gray-400">Admin Panel</p>
         </div>
@@ -58,8 +59,8 @@ export default async function DashboardLayout({
         {/* Compact top bar shown only on phones. */}
         <header className="sticky top-0 z-40 border-b border-gray-200 bg-white md:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
-            <Link href="/admin" className="text-base font-bold text-orange-500">
-              LawenBook
+            <Link href="/admin" className="shrink-0" aria-label="LawenBook">
+              <Logo className="h-10 w-36" />
             </Link>
             <LogoutButton />
           </div>

@@ -50,7 +50,7 @@ export default function SpecialOffersSection({
               <p className="text-xl font-bold text-gray-900">
                 {offer.title}
               </p>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 whitespace-pre-line text-sm text-gray-500">
                 {offer.description}
               </p>
               <div className="mt-2 flex items-center gap-2">

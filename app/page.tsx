@@ -9,7 +9,9 @@ import { getPromotionPriceMap, getEffectivePrice } from "@/lib/pricing";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const books = await prisma.book.findMany({ orderBy: { id: "asc" } });
+  const books = await prisma.book.findMany({
+    orderBy: [{ position: "asc" }, { id: "asc" }],
+  });
 
   const promoMap = await getPromotionPriceMap();
 

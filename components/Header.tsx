@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import AnnouncementBar from "./AnnouncementBar";
+import Logo from "./Logo";
 
 export default function Header() {
   const { totalItems } = useCart();
@@ -12,8 +13,10 @@ export default function Header() {
       <AnnouncementBar />
       <header className="bg-white border-b border-gray-200">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <Link href="/" className="shrink-0 text-xl font-bold text-orange-500 sm:text-2xl">
-            LawenBook
+          <Link href="/" className="shrink-0" aria-label="LawenBook">
+            {/* Logo size lives here. h-16 = 64px tall, h-20 = 80px on wider
+              screens. Bump both numbers together to grow the logo. */}
+            <Logo priority className="h-16 w-52 sm:h-20 sm:w-64" />
           </Link>
 
           <Link
