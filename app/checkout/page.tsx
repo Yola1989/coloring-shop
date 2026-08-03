@@ -5,13 +5,37 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
+import { useUpsellData } from "@/lib/upsellClient";
+import { applyUpsellPricing } from "@/lib/upsell";
 
 // Moroccan numbers: 05/06/07 + 8 digits, or the +212 international form.
 const PHONE_RE = /^(?:\+212|0)[5-7]\d{8}$/;
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, totalPrice, clearCart } = useCart();
+  const { cart, clearCart } = useCart();
+  const upsell = useUpsellData();
+
+  // This page was still adding up the raw cart prices, so the offer vanished
+  // at the last step. It now runs the very same rule as the cart and the
+  // server, so all three always agree.
+  const eligibleIds = new Set((upsell?.books ?? []).map((b) => b.id));
+
+  const pricing = applyUpsellPricing(
+    cart.map((item) => ({
+      key: `${item.type}-${item.id}`,
+      isBook: item.type === "book",
+      promoApplied: item.type === "book" && !eligibleIds.has(item.id),
+      unitPrice: item.price,
+      quantity: item.quantity,
+    })),
+    {
+      enabled: Boolean(upsell?.enabled),
+      price: upsell?.price ?? 0,
+      title: "",
+      subtitle: "",
+    }
+  );
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -106,7 +130,7 @@ export default function CheckoutPage() {
         </p>
 
         <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
-          {cart.map((item) => (
+          {cart.map((item, index) => (
             <div
               key={`${item.type}-${item.id}`}
               className="flex items-center justify-between gap-3 py-1 text-sm"
@@ -114,15 +138,34 @@ export default function CheckoutPage() {
               <span className="min-w-0 break-words text-gray-700">
                 {item.title} × {item.quantity}
               </span>
-              <span className="shrink-0 font-semibold text-gray-900">
-                {item.price * item.quantity} د.م
+              <span className="shrink-0 text-left font-semibold text-gray-900">
+                {pricing.lines[index].lineTotal} د.م
+                {pricing.lines[index].lineTotal <
+                  pricing.lines[index].originalTotal && (
+                  <span className="block text-xs font-normal text-gray-400 line-through">
+                    {pricing.lines[index].originalTotal} د.م
+                  </span>
+                )}
               </span>
             </div>
           ))}
           <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
             <span className="font-bold text-gray-900">المجموع</span>
-            <span className="font-bold text-orange-500">{totalPrice} د.م</span>
+            <span className="flex items-baseline gap-2 font-bold text-orange-500">
+              {pricing.applied && (
+                <span className="text-xs font-normal text-gray-400 line-through">
+                  {pricing.originalTotal} د.م
+                </span>
+              )}
+              {pricing.total} د.م
+            </span>
           </div>
+
+          {pricing.applied && (
+            <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-center text-xs font-semibold text-green-700">
+              🎉 وفّرت {pricing.discount} د.م
+            </p>
+          )}
         </div>
 
         <form
@@ -213,11 +256,11 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-xl bg-orange-500 py-4 text-base font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50 sm:text-lg"
+            className="w-full rounded-xl bg-orange-500 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50 sm:py-4 sm:text-base"
           >
             {submitting
               ? "جاري إرسال الطلب..."
-              : `تأكيد الطلب (الدفع عند الاستلام) — ${totalPrice} د.م`}
+              : `تأكيد الطلب — ${pricing.total} د.م`}
           </button>
         </form>
       </main>

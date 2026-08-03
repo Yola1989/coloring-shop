@@ -59,11 +59,13 @@ export default async function BookDetails({ params }: Props) {
   <>
     <Header />
 
-    <main className="mx-auto max-w-7xl px-6 py-12">
-    <div className="grid gap-12 lg:grid-cols-2">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
 
       {/* Cover */}
-      <div>
+      {/* min-w-0 stops a wide child from stretching the whole grid track,
+          which is what pushed this page off the side of the screen. */}
+      <div className="min-w-0">
         <Image
           src={book.cover}
           alt={`غلاف كتاب التلوين ${book.title}`}
@@ -80,8 +82,8 @@ export default async function BookDetails({ params }: Props) {
       </div>
 
       {/* Info */}
-      <div>
-        <h1 className="text-4xl font-bold text-gray-900">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold break-words text-gray-900 sm:text-3xl lg:text-4xl">
           {book.title}
         </h1>
 

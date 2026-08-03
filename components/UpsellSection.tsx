@@ -79,7 +79,10 @@ export default function UpsellSection({
   return (
     <section
       dir="rtl"
-      className={"rounded-3xl border-2 border-dashed border-orange-300 bg-orange-50 p-4 sm:p-6 " + className}
+      className={
+        "w-full min-w-0 max-w-full overflow-hidden rounded-3xl border-2 border-dashed border-orange-300 bg-orange-50 p-4 sm:p-6 " +
+        className
+      }
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <h2 className="text-base font-bold text-gray-900 sm:text-xl">
@@ -106,9 +109,9 @@ export default function UpsellSection({
         </p>
       )}
 
-      {/* Bleeds to the screen edge on phones so a half-visible card makes
-          it obvious the row can be swiped. */}
-      <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+      {/* No negative margins here: they made this row wider than the page
+          itself, which broke the layout and killed the swipe. */}
+      <div className="mt-4 flex w-full snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
         {books.map((book) => (
           <div
             key={book.id}

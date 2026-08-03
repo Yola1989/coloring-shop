@@ -148,7 +148,7 @@ export default function CartPage() {
 
             <Link
               href="/checkout"
-              className="block w-full rounded-xl bg-orange-500 py-4 text-center text-base font-semibold text-white transition hover:bg-orange-600 sm:text-lg"
+              className="block w-full rounded-xl bg-orange-500 py-3 text-center text-sm font-semibold text-white transition hover:bg-orange-600 sm:py-4 sm:text-base"
             >
               متابعة الطلب
             </Link>
