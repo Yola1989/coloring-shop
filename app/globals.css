@@ -28,6 +28,21 @@ body {
   overflow-x: clip;
 }
 
+/*
+  The body is a flex column (so the footer can sit at the bottom of short
+  pages). A flex child refuses to shrink below the width of its own content
+  by default, so one wide element inside a page could stretch the whole
+  <main> past the edge of the screen, and "overflow-x: clip" above then hid
+  the overflowing part instead of letting anyone scroll to it.
+
+  These two lines break that: min-width lets the child shrink, and max-width
+  caps it at the real body width, which is always the screen width.
+*/
+body > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* Media can never overflow its container. */
 img,
 svg,
