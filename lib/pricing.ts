@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { UpsellConfig } from "@/lib/upsell";
 
 // Single source of truth for "what does this book actually cost right
 // now". Used by every page/route that shows or charges a book price
@@ -20,6 +21,19 @@ export async function getPromotionPriceMap(): Promise<Map<number, number>> {
   }
 
   return map;
+}
+
+// Reads the "second book" offer the admin configured in Settings.
+export async function getUpsellConfig(): Promise<UpsellConfig> {
+  const settings = await prisma.settings.findFirst();
+  const price = settings?.upsellPrice ?? 0;
+
+  return {
+    enabled: Boolean(settings?.upsellEnabled) && price > 0,
+    price,
+    title: settings?.upsellTitle || "أضف كتاباً ثانياً بثمن خاص",
+    subtitle: settings?.upsellSubtitle || "اختر أي كتاب آخر واستفد من الثمن المخفض",
+  };
 }
 
 export function getEffectivePrice(

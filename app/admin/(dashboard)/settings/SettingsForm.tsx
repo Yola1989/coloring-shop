@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 type SettingsValues = {
   whatsappNumber: string;
   homepageVideoUrl: string;
+  upsellEnabled: boolean;
+  upsellPrice: string;
+  upsellTitle: string;
+  upsellSubtitle: string;
 };
 
 export default function SettingsForm({
@@ -167,6 +171,78 @@ export default function SettingsForm({
             />
           </div>
         )}
+      </div>
+
+      <div className="border-t border-gray-200 pt-8">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={values.upsellEnabled}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, upsellEnabled: e.target.checked }))
+            }
+            className="h-5 w-5 rounded border-gray-300 accent-orange-500"
+          />
+          <span className="text-sm font-semibold text-gray-800">
+            Second Book Offer
+          </span>
+        </label>
+
+        <p className="mt-2 text-xs text-gray-500">
+          Once a customer has one book in the cart, every extra book drops to
+          the price below. The most expensive book always keeps its full
+          price. Books already on Books Promotion are skipped, so the two
+          discounts never stack.
+        </p>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-xs font-semibold text-gray-700">
+              Price of each extra book (DH)
+            </label>
+            <input
+              type="number"
+              min={0}
+              inputMode="numeric"
+              placeholder="69"
+              value={values.upsellPrice}
+              onChange={(e) =>
+                setValues((v) => ({ ...v, upsellPrice: e.target.value }))
+              }
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-700">
+              Offer heading
+            </label>
+            <input
+              type="text"
+              placeholder="Leave empty for the default Arabic text"
+              value={values.upsellTitle}
+              onChange={(e) =>
+                setValues((v) => ({ ...v, upsellTitle: e.target.value }))
+              }
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-xs font-semibold text-gray-700">
+            Offer subtext
+          </label>
+          <input
+            type="text"
+            placeholder="Leave empty for the default Arabic text"
+            value={values.upsellSubtitle}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, upsellSubtitle: e.target.value }))
+            }
+            className={inputClass}
+          />
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}

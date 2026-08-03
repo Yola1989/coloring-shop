@@ -84,7 +84,11 @@ model SpecialOffer {
 }
 
 model Settings {
-  id               Int    @id @default(autoincrement())
-  whatsappNumber   String @default("")
-  homepageVideoUrl String @default("")
+  id               Int     @id @default(autoincrement())
+  whatsappNumber   String  @default("")
+  homepageVideoUrl String  @default("")
+  upsellEnabled    Boolean @default(false)
+  upsellPrice      Int     @default(0)
+  upsellTitle      String  @default("")
+  upsellSubtitle   String  @default("")
 }

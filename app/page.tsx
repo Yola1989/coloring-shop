@@ -111,6 +111,15 @@ export default async function Home() {
                 cover={book.cover}
                 age={book.age}
                 pages={book.pages}
+                upsellPrice={
+                  settings?.upsellEnabled &&
+                  settings.upsellPrice > 0 &&
+                  book.price > settings.upsellPrice &&
+                  getEffectivePrice(book.id, book.price, promoMap) ===
+                    book.price
+                    ? settings.upsellPrice
+                    : null
+                }
               />
             ))}
           </div>

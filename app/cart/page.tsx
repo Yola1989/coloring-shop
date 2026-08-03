@@ -4,9 +4,35 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
+import UpsellSection from "@/components/UpsellSection";
+import { useUpsellData } from "@/lib/upsellClient";
+import { applyUpsellPricing } from "@/lib/upsell";
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, totalPrice } = useCart();
+  const { cart, removeFromCart, updateQuantity } = useCart();
+  const upsell = useUpsellData();
+
+  // Anything missing from this list is either already on Promotion or
+  // cheaper than the offer, so it must not be discounted again.
+  const eligibleIds = new Set((upsell?.books ?? []).map((b) => b.id));
+
+  // Exactly the calculation the server repeats when the order is created,
+  // so the total shown here is the total that gets charged.
+  const pricing = applyUpsellPricing(
+    cart.map((item) => ({
+      key: `${item.type}-${item.id}`,
+      isBook: item.type === "book",
+      promoApplied: item.type === "book" && !eligibleIds.has(item.id),
+      unitPrice: item.price,
+      quantity: item.quantity,
+    })),
+    {
+      enabled: Boolean(upsell?.enabled),
+      price: upsell?.price ?? 0,
+      title: "",
+      subtitle: "",
+    }
+  );
 
   return (
     <>
@@ -27,7 +53,7 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="mt-8 space-y-4 sm:space-y-6">
-            {cart.map((item) => (
+            {cart.map((item, index) => (
               <div
                 key={`${item.type}-${item.id}`}
                 className="flex items-center gap-3 rounded-2xl border border-gray-200 p-3 sm:gap-6 sm:p-4"
@@ -46,7 +72,10 @@ export default function CartPage() {
                     {item.title}
                   </h2>
                   <p className="text-xs text-gray-500 sm:text-sm">
-                    {item.price} د.م
+                    {pricing.lines[index].groups
+                      .map((g) => `${g.quantity} × ${g.price}`)
+                      .join(" + ")}{" "}
+                    د.م
                   </p>
 
                   <div className="mt-2 flex items-center gap-2 sm:mt-3 sm:gap-3">
@@ -76,8 +105,14 @@ export default function CartPage() {
 
                 <div className="shrink-0 text-left">
                   <p className="whitespace-nowrap text-sm font-bold text-gray-900 sm:text-base">
-                    {item.price * item.quantity} د.م
+                    {pricing.lines[index].lineTotal} د.م
                   </p>
+                  {pricing.lines[index].lineTotal <
+                    pricing.lines[index].originalTotal && (
+                    <p className="whitespace-nowrap text-xs text-gray-400 line-through">
+                      {pricing.lines[index].originalTotal} د.م
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={() => removeFromCart(item.id, item.type)}
@@ -89,12 +124,25 @@ export default function CartPage() {
               </div>
             ))}
 
+            <UpsellSection />
+
+            {pricing.applied && (
+              <p className="rounded-xl bg-green-50 px-4 py-3 text-center text-sm font-semibold text-green-700">
+                🎉 وفّرت {pricing.discount} د.م
+              </p>
+            )}
+
             <div className="flex items-center justify-between border-t border-gray-200 pt-6">
               <span className="text-lg font-bold text-gray-900 sm:text-xl">
                 المجموع
               </span>
-              <span className="text-lg font-bold text-orange-500 sm:text-xl">
-                {totalPrice} د.م
+              <span className="flex items-baseline gap-2 text-lg font-bold text-orange-500 sm:text-xl">
+                {pricing.applied && (
+                  <span className="text-sm font-normal text-gray-400 line-through">
+                    {pricing.originalTotal} د.م
+                  </span>
+                )}
+                {pricing.total} د.م
               </span>
             </div>
 

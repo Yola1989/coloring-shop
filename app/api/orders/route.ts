@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/orderNumber";
 import { sendNewOrderEmail } from "@/lib/email";
-import { getPromotionPriceMap, getEffectivePrice } from "@/lib/pricing";
+import {
+  getPromotionPriceMap,
+  getEffectivePrice,
+  getUpsellConfig,
+} from "@/lib/pricing";
+import { applyUpsellPricing } from "@/lib/upsell";
 
 type CartInput = {
   id: number;
@@ -116,10 +121,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid cart" }, { status: 400 });
   }
 
-  const totalAmount = items.reduce(
-    (sum, i) => sum + i.price * i.quantity,
-    0
+  // The browser is never trusted with the offer either - the same shared
+  // rule runs again here and decides the real amount owed.
+  const upsellConfig = await getUpsellConfig();
+
+  const pricing = applyUpsellPricing(
+    items.map((item, index) => ({
+      key: String(index),
+      isBook: item.bookId !== null,
+      promoApplied: item.bookId !== null && promoMap.has(item.bookId),
+      unitPrice: item.price,
+      quantity: item.quantity,
+    })),
+    upsellConfig
   );
+
+  // A book bought at two different prices becomes two order lines, so the
+  // invoice stays honest instead of averaging the prices together.
+  const finalItems = items.flatMap((item, index) =>
+    pricing.lines[index].groups.map((group) => ({
+      bookId: item.bookId,
+      offerId: item.offerId,
+      title: item.title,
+      price: group.price,
+      quantity: group.quantity,
+    }))
+  );
+
+  const totalAmount = pricing.total;
 
   const order = await prisma.order.create({
     data: {
@@ -132,7 +161,7 @@ export async function POST(req: NextRequest) {
       totalAmount,
       status: "NEW",
       items: {
-        create: items.map((i) => ({
+        create: finalItems.map((i) => ({
           bookId: i.bookId,
           offerId: i.offerId,
           title: i.title,

@@ -16,6 +16,8 @@ type BookCardProps = {
   pages?: number;
   /** Original price, shown struck through when a promotion is active. */
   oldPrice?: number | null;
+  /** When set, shows the second-book offer badge at this price. */
+  upsellPrice?: number | null;
 };
 
 export default function BookCard({
@@ -26,6 +28,7 @@ export default function BookCard({
   age,
   pages,
   oldPrice,
+  upsellPrice,
 }: BookCardProps) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
@@ -68,6 +71,12 @@ export default function BookCard({
             <p className="text-sm text-gray-400 line-through">{oldPrice} DH</p>
           )}
         </div>
+
+        {typeof upsellPrice === "number" && (
+          <p className="mt-1.5 inline-block rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-700 sm:text-xs">
+            🎁 الثاني بـ {upsellPrice} د.م
+          </p>
+        )}
 
         {/* Real values from the database instead of hardcoded text. */}
         <div className="mt-2 hidden space-y-1 text-sm text-gray-500 sm:block">

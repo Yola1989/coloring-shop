@@ -30,6 +30,11 @@ export async function PUT(req: NextRequest) {
       data: {
         whatsappNumber: data.whatsappNumber || "",
         homepageVideoUrl: data.homepageVideoUrl || "",
+        upsellEnabled: Boolean(data.upsellEnabled),
+        // A negative or nonsense price would silently break the cart total.
+        upsellPrice: Math.max(0, Math.floor(Number(data.upsellPrice) || 0)),
+        upsellTitle: data.upsellTitle || "",
+        upsellSubtitle: data.upsellSubtitle || "",
       },
     });
 

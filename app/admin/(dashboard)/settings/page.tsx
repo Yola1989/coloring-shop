@@ -16,6 +16,10 @@ export default async function AdminSettingsPage() {
         initial={{
           whatsappNumber: settings.whatsappNumber,
           homepageVideoUrl: settings.homepageVideoUrl,
+          upsellEnabled: settings.upsellEnabled,
+          upsellPrice: settings.upsellPrice ? String(settings.upsellPrice) : "",
+          upsellTitle: settings.upsellTitle,
+          upsellSubtitle: settings.upsellSubtitle,
         }}
       />
     </div>

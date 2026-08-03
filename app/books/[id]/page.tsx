@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import AddToCartButton from "@/components/AddToCartButton";
 import PreviewGallery from "@/components/PreviewGallery";
 import ProductVideo from "@/components/ProductVideo";
+import UpsellSection from "@/components/UpsellSection";
 import { getPromotionPriceMap, getEffectivePrice } from "@/lib/pricing";
 
 type Props = {
@@ -112,6 +113,8 @@ export default async function BookDetails({ params }: Props) {
             cover={book.cover}
           />
         </div>
+
+        <UpsellSection className="mt-10" excludeBookId={book.id} />
 
         <ProductVideo videoUrl={book.videoUrl} />
       </div>
