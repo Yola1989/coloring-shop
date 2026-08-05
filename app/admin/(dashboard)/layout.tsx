@@ -3,6 +3,22 @@ import { redirect } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
 import LogoutButton from "./LogoutButton";
 import Logo from "@/components/Logo";
+import type { Metadata, Viewport } from "next";
+
+/*
+  Only the admin area advertises an installable app. The storefront
+  deliberately has no manifest, so customers are never prompted to
+  install a dashboard they cannot open.
+*/
+export const metadata: Metadata = {
+  title: "LawenBook Admin",
+  manifest: "/admin.webmanifest",
+  robots: { index: false, follow: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f97316",
+};
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Books", icon: "📚" },
