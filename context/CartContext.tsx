@@ -4,6 +4,12 @@ import { createContext, useContext, useState } from "react";
 
 export type CartItemType = "book" | "offer";
 
+// The books a customer chose for a "pick any N books" offer.
+export type CartSelectionBook = {
+  id: number;
+  title: string;
+};
+
 export type CartItem = {
   id: number;
   type: CartItemType;
@@ -11,13 +17,33 @@ export type CartItem = {
   price: number;
   cover: string;
   quantity: number;
+  selection?: CartSelectionBook[];
 };
+
+/*
+  Two cart lines can now hold the same offer with different books inside, so
+  an id and a type no longer identify a line on their own. Every lookup goes
+  through this key, which folds the chosen books into the identity.
+*/
+export function cartLineKey(item: {
+  id: number;
+  type: CartItemType;
+  selection?: CartSelectionBook[];
+}) {
+  const picked = (item.selection ?? [])
+    .map((b) => b.id)
+    .slice()
+    .sort((a, b) => a - b)
+    .join(".");
+
+  return item.type + "-" + item.id + "-" + picked;
+}
 
 type CartContextType = {
   cart: CartItem[];
   addToCart: (item: Omit<CartItem, "quantity">) => void;
-  removeFromCart: (id: number, type: CartItemType) => void;
-  updateQuantity: (id: number, type: CartItemType, quantity: number) => void;
+  removeFromCart: (key: string) => void;
+  updateQuantity: (key: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -33,16 +59,14 @@ export function CartProvider({
   const [cart, setCart] = useState<CartItem[]>([]);
 
   function addToCart(item: Omit<CartItem, "quantity">) {
+    const key = cartLineKey(item);
+
     setCart((prev) => {
-      const existing = prev.find(
-        (i) => i.id === item.id && i.type === item.type
-      );
+      const existing = prev.find((i) => cartLineKey(i) === key);
 
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id && i.type === item.type
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
+          cartLineKey(i) === key ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
 
@@ -50,20 +74,18 @@ export function CartProvider({
     });
   }
 
-  function removeFromCart(id: number, type: CartItemType) {
-    setCart((prev) => prev.filter((i) => !(i.id === id && i.type === type)));
+  function removeFromCart(key: string) {
+    setCart((prev) => prev.filter((i) => cartLineKey(i) !== key));
   }
 
-  function updateQuantity(id: number, type: CartItemType, quantity: number) {
+  function updateQuantity(key: string, quantity: number) {
     if (quantity < 1) {
-      removeFromCart(id, type);
+      removeFromCart(key);
       return;
     }
 
     setCart((prev) =>
-      prev.map((i) =>
-        i.id === id && i.type === type ? { ...i, quantity } : i
-      )
+      prev.map((i) => (cartLineKey(i) === key ? { ...i, quantity } : i))
     );
   }
 

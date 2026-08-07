@@ -21,6 +21,7 @@ export type OrderEmailItem = {
   title: string;
   price: number;
   quantity: number;
+  selection?: string | null;
 };
 
 export type OrderEmailData = {
@@ -47,7 +48,11 @@ export async function sendNewOrderEmail(order: OrderEmailData) {
   }
 
   const itemsList = order.items
-    .map((i) => `- ${i.title} x${i.quantity} — ${i.price * i.quantity} DH`)
+    .map(
+      (i) =>
+        `- ${i.title} x${i.quantity} — ${i.price * i.quantity} DH` +
+        (i.selection ? `\n    Chosen books: ${i.selection}` : "")
+    )
     .join("\n");
 
   const text = `New order received: ${order.orderNumber}
@@ -67,7 +72,7 @@ Total: ${order.totalAmount} DH
   const itemsHtml = order.items
     .map(
       (i) =>
-        `<tr><td style="padding:4px 8px">${i.title}</td><td style="padding:4px 8px">x${i.quantity}</td><td style="padding:4px 8px">${i.price * i.quantity} DH</td></tr>`
+        `<tr><td style="padding:4px 8px">${i.title}${i.selection ? `<br/><small style="color:#666">${i.selection}</small>` : ""}</td><td style="padding:4px 8px">x${i.quantity}</td><td style="padding:4px 8px">${i.price * i.quantity} DH</td></tr>`
     )
     .join("");
 

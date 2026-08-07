@@ -22,6 +22,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
         imageUrl: data.imageUrl,
         price: Number(data.price),
         oldPrice: data.oldPrice ? Number(data.oldPrice) : null,
+        pickEnabled: Boolean(data.pickEnabled),
+        pickCount: Number(data.pickCount ?? 0),
         position: Number(data.position ?? 0),
       },
     });

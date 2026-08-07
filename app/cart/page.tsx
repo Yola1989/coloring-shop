@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { useCart } from "@/context/CartContext";
+import { useCart, cartLineKey } from "@/context/CartContext";
 import UpsellSection from "@/components/UpsellSection";
 import { useUpsellData } from "@/lib/upsellClient";
 import { applyUpsellPricing } from "@/lib/upsell";
@@ -20,7 +20,7 @@ export default function CartPage() {
   // so the total shown here is the total that gets charged.
   const pricing = applyUpsellPricing(
     cart.map((item) => ({
-      key: `${item.type}-${item.id}`,
+      key: cartLineKey(item),
       isBook: item.type === "book",
       promoApplied: item.type === "book" && !eligibleIds.has(item.id),
       unitPrice: item.price,
@@ -55,7 +55,7 @@ export default function CartPage() {
           <div className="mt-8 space-y-4 sm:space-y-6">
             {cart.map((item, index) => (
               <div
-                key={`${item.type}-${item.id}`}
+                key={cartLineKey(item)}
                 className="flex items-center gap-3 rounded-2xl border border-gray-200 p-3 sm:gap-6 sm:p-4"
               >
                 <Image
@@ -78,12 +78,18 @@ export default function CartPage() {
                     د.م
                   </p>
 
+                  {item.selection && item.selection.length > 0 && (
+                    <p className="mt-1 text-xs break-words text-gray-500">
+                      📚 {item.selection.map((b) => b.title).join(" • ")}
+                    </p>
+                  )}
+
                   <div className="mt-2 flex items-center gap-2 sm:mt-3 sm:gap-3">
                     <button
                       type="button"
                       aria-label="إنقاص الكمية"
                       onClick={() =>
-                        updateQuantity(item.id, item.type, item.quantity - 1)
+                        updateQuantity(cartLineKey(item), item.quantity - 1)
                       }
                       className="h-8 w-8 shrink-0 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
                     >
@@ -94,7 +100,7 @@ export default function CartPage() {
                       type="button"
                       aria-label="زيادة الكمية"
                       onClick={() =>
-                        updateQuantity(item.id, item.type, item.quantity + 1)
+                        updateQuantity(cartLineKey(item), item.quantity + 1)
                       }
                       className="h-8 w-8 shrink-0 rounded-full border border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
                     >
@@ -115,7 +121,7 @@ export default function CartPage() {
                   )}
                   <button
                     type="button"
-                    onClick={() => removeFromCart(item.id, item.type)}
+                    onClick={() => removeFromCart(cartLineKey(item))}
                     className="mt-2 text-xs text-red-500 hover:underline sm:text-sm"
                   >
                     حذف

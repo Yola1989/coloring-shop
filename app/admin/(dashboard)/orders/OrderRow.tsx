@@ -8,6 +8,8 @@ type OrderItem = {
   title: string;
   price: number;
   quantity: number;
+  // Books the customer chose inside a pick-your-own offer.
+  selection: string | null;
 };
 
 type Order = {
@@ -154,8 +156,13 @@ export default function OrderRow({ order }: { order: Order }) {
                 key={item.id}
                 className="flex justify-between py-0.5 text-gray-600"
               >
-                <span>
+                <span className="min-w-0 pr-3">
                   {item.title} × {item.quantity}
+                  {item.selection && (
+                    <span className="block text-xs text-gray-400">
+                      {item.selection}
+                    </span>
+                  )}
                 </span>
                 <span>{item.price * item.quantity} DH</span>
               </div>

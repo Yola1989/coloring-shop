@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { useCart } from "@/context/CartContext";
+import { useCart, cartLineKey } from "@/context/CartContext";
 import { useUpsellData } from "@/lib/upsellClient";
 import { applyUpsellPricing } from "@/lib/upsell";
 
@@ -23,7 +23,7 @@ export default function CheckoutPage() {
 
   const pricing = applyUpsellPricing(
     cart.map((item) => ({
-      key: `${item.type}-${item.id}`,
+      key: cartLineKey(item),
       isBook: item.type === "book",
       promoApplied: item.type === "book" && !eligibleIds.has(item.id),
       unitPrice: item.price,
@@ -78,6 +78,7 @@ export default function CheckoutPage() {
             id: i.id,
             type: i.type,
             quantity: i.quantity,
+            selection: (i.selection ?? []).map((b) => b.id),
           })),
         }),
       });
@@ -132,11 +133,16 @@ export default function CheckoutPage() {
         <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
           {cart.map((item, index) => (
             <div
-              key={`${item.type}-${item.id}`}
+              key={cartLineKey(item)}
               className="flex items-center justify-between gap-3 py-1 text-sm"
             >
               <span className="min-w-0 break-words text-gray-700">
                 {item.title} × {item.quantity}
+                {item.selection && item.selection.length > 0 && (
+                  <span className="block text-xs text-gray-500">
+                    📚 {item.selection.map((b) => b.title).join(" • ")}
+                  </span>
+                )}
               </span>
               <span className="shrink-0 text-left font-semibold text-gray-900">
                 {pricing.lines[index].lineTotal} د.م

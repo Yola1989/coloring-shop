@@ -13,6 +13,8 @@ type CartInput = {
   id: number;
   type?: "book" | "offer";
   quantity: number;
+  // Book ids chosen for an offer that lets the customer pick.
+  selection?: number[];
 };
 
 // Moroccan numbers: 05/06/07 + 8 digits, or the +212 international form.
@@ -97,23 +99,69 @@ export async function POST(req: NextRequest) {
         title: book.title,
         price: getEffectivePrice(book.id, book.price, promoMap),
         quantity: Math.max(1, Math.floor(c.quantity)),
+        selection: null as string | null,
       };
     })
     .filter((i): i is NonNullable<typeof i> => i !== null);
+
+  // Titles for "pick your own books" offers are read from the database too,
+  // so the packing list can never be edited from the browser.
+  const pickedBookIds = Array.from(
+    new Set(
+      offerInputs.flatMap((c) =>
+        Array.isArray(c.selection) ? c.selection.map(Number) : []
+      )
+    )
+  );
+
+  const pickedBooks = pickedBookIds.length
+    ? await prisma.book.findMany({
+        where: { id: { in: pickedBookIds } },
+        select: { id: true, title: true },
+      })
+    : [];
+
+  let selectionError = "";
 
   const offerItems = offerInputs
     .map((c) => {
       const offer = offers.find((o) => o.id === c.id);
       if (!offer) return null;
+
+      let selection: string | null = null;
+
+      if (offer.pickEnabled && offer.pickCount > 0) {
+        const ids = Array.from(
+          new Set((Array.isArray(c.selection) ? c.selection : []).map(Number))
+        );
+
+        const titles = ids
+          .map((bookId) => pickedBooks.find((b) => b.id === bookId)?.title)
+          .filter((t): t is string => Boolean(t));
+
+        // Refusing the order beats shipping a bundle nobody can identify.
+        if (titles.length !== offer.pickCount) {
+          selectionError = "المرجو اختيار الكتب قبل إتمام الطلب.";
+          return null;
+        }
+
+        selection = titles.join(" • ");
+      }
+
       return {
         bookId: null as number | null,
         offerId: offer.id as number | null,
         title: offer.title,
         price: offer.price,
         quantity: Math.max(1, Math.floor(c.quantity)),
+        selection,
       };
     })
     .filter((i): i is NonNullable<typeof i> => i !== null);
+
+  if (selectionError) {
+    return NextResponse.json({ error: selectionError }, { status: 400 });
+  }
 
   const items = [...bookItems, ...offerItems];
 
@@ -145,6 +193,7 @@ export async function POST(req: NextRequest) {
       title: item.title,
       price: group.price,
       quantity: group.quantity,
+      selection: item.selection,
     }))
   );
 
@@ -167,6 +216,7 @@ export async function POST(req: NextRequest) {
           title: i.title,
           price: i.price,
           quantity: i.quantity,
+          selection: i.selection,
         })),
       },
     },
@@ -186,6 +236,7 @@ export async function POST(req: NextRequest) {
         title: i.title,
         price: i.price,
         quantity: i.quantity,
+        selection: i.selection,
       })),
       totalAmount: order.totalAmount,
     });

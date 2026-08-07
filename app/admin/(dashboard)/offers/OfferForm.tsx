@@ -13,6 +13,8 @@ type OfferFormValues = {
   oldPrice: number | null;
   enabled: boolean;
   position: number;
+  pickEnabled: boolean;
+  pickCount: number;
 };
 
 export default function OfferForm({
@@ -32,6 +34,8 @@ export default function OfferForm({
       oldPrice: null,
       enabled: false,
       position: 0,
+      pickEnabled: false,
+      pickCount: 0,
     }
   );
 
@@ -71,6 +75,11 @@ export default function OfferForm({
 
     if (!values.imageUrl) {
       setError("Please upload a product image.");
+      return;
+    }
+
+    if (values.pickEnabled && values.pickCount < 1) {
+      setError("Set how many books the customer can pick.");
       return;
     }
 
@@ -182,6 +191,45 @@ export default function OfferForm({
             className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
           />
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={values.pickEnabled}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, pickEnabled: e.target.checked }))
+            }
+            className="h-5 w-5 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+          />
+          <span className="text-sm font-semibold text-gray-800">
+            Let the customer pick the books
+          </span>
+        </label>
+
+        <p className="mt-2 text-xs text-gray-600">
+          The customer picks which books go in the bundle and pays the offer
+          price above. Leave this off for a fixed bundle.
+        </p>
+
+        {values.pickEnabled && (
+          <div className="mt-4">
+            <label className="block text-sm font-semibold text-gray-800">
+              How many books can they pick?
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={values.pickCount || ""}
+              onChange={(e) =>
+                setValues((v) => ({ ...v, pickCount: Number(e.target.value) }))
+              }
+              placeholder="3"
+              className="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-orange-500"
+            />
+          </div>
+        )}
       </div>
 
       <div>

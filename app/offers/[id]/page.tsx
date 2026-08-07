@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Header from "@/components/Header";
 import AddToCartButton from "@/components/AddToCartButton";
+import OfferBookPicker from "@/components/OfferBookPicker";
 
 type Props = {
   params: Promise<{
@@ -23,13 +24,24 @@ export default async function OfferDetails({ params }: Props) {
     notFound();
   }
 
+  // Only a "pick your own books" offer needs the catalogue, so a plain
+  // bundle keeps loading exactly as fast as it did before.
+  const letsCustomerPick = offer.pickEnabled && offer.pickCount > 0;
+
+  const books = letsCustomerPick
+    ? await prisma.book.findMany({
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: { id: true, title: true, cover: true },
+      })
+    : [];
+
   return (
     <>
       <Header />
 
-      <main className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid gap-12 lg:grid-cols-2">
-          <div>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="min-w-0">
             <Image
               src={offer.imageUrl}
               alt={offer.title}
@@ -41,8 +53,8 @@ export default async function OfferDetails({ params }: Props) {
             />
           </div>
 
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold break-words text-gray-900 sm:text-3xl lg:text-4xl">
               {offer.title}
             </h1>
 
@@ -62,13 +74,24 @@ export default async function OfferDetails({ params }: Props) {
             </p>
 
             <div className="mt-10">
-              <AddToCartButton
-                id={offer.id}
-                type="offer"
-                title={offer.title}
-                price={offer.price}
-                cover={offer.imageUrl}
-              />
+              {letsCustomerPick ? (
+                <OfferBookPicker
+                  offerId={offer.id}
+                  offerTitle={offer.title}
+                  offerPrice={offer.price}
+                  offerImage={offer.imageUrl}
+                  pickCount={offer.pickCount}
+                  books={books}
+                />
+              ) : (
+                <AddToCartButton
+                  id={offer.id}
+                  type="offer"
+                  title={offer.title}
+                  price={offer.price}
+                  cover={offer.imageUrl}
+                />
+              )}
             </div>
           </div>
         </div>
